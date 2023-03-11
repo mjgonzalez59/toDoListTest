@@ -10,7 +10,7 @@ const addAnItem = function (form, itemInput, itemsArray, elementsList) {
         }
         const taskItem = {
             name: itemName,
-            status: "notCompleted",
+            status: "toDo",
             addedAt: new Date().getTime(),
         }
         console.log(taskItem);
@@ -21,13 +21,20 @@ const addAnItem = function (form, itemInput, itemsArray, elementsList) {
 }
 
 //Load local storage items to itemsArray
-const loadItems = function(itemsArray, elementsList){
-    const localItems = getLocalStorage(itemsArray);
+const loadItems = function(itemsArray, elementsList, tabSelected){
+    let localItems = [];
+    if(tabSelected){
+        localItems = itemsArray;
+    }else {
+        localItems = getLocalStorage(itemsArray);
+    }
+    
     elementsList.innerHTML = "";
     // if(localItems.length > 0){
     if(localItems !== null || localItems !== undefined){
         localItems.forEach(item => { 
             renderItem(item, elementsList);
+            console.log(item);
             insertHandleToActionIcons(item, localItems, elementsList);
         });
     }else{
@@ -156,7 +163,7 @@ const findItemIndex = function(localStorageArray, item){
 
 
 const changeStatus = function(item){
-    item.status === "notCompleted" ? item.status = "completed" : item.status = "notCompleted";
+    item.status === "toDo" ? item.status = "done" : item.status = "toDo";
 }
 
 const updateName = (item, newName) => item.name = newName;
@@ -166,13 +173,53 @@ const deleteItem = function(localStorageArray, itemIndex){
     localStorageArray.splice(itemIndex, 1);
 }
 
+const showTab = function(tabElement){
+    // tabElement.classList.add("active");
+    tabElement.firstElementChild.classList.add("active");
+}
+
+const hideAllTabs = function(tabsList){
+    tabsList.forEach(tab => {
+        // tab.classList.remove("active");
+        tab.firstElementChild.classList.remove("active");
+    });
+}
+
+
+const loadTabs = function(tabsList, itemsArray, elementsList){
+    if(tabsList !== null || tabsList !== undefined){
+        tabsList.forEach(tab => {
+            tab.addEventListener("click", event => {
+                event.preventDefault();
+                hideAllTabs(tabsList);
+                showTab(tab);
+                const filteredTask = getTaskStatus(tab, itemsArray);
+                console.log(filteredTask);
+                loadItems(filteredTask, elementsList, true);
+            });
+        });
+    }
+}
+
+const getTaskStatus = function(tab, itemsArray){
+    itemsArray = getLocalStorage(itemsArray);
+    const dataType = tab.getAttribute('data-type');
+    if(dataType == "all"){
+        return itemsArray;
+    }
+    const itemsFiltered = itemsArray.filter(task => task.status == dataType);
+    // console.log();
+    return itemsFiltered;
+        // console.log(spanElement.getAttribute("data-time"))
+}
+
 // Creating Variables from DOM elements
 const form = document.querySelector("#itemForm");
 const itemInput = document.querySelector("#itemInput");
 const editItemInput = document.querySelector("#editItemInput");
 const itemsList = document.querySelector("#itemsList");
 const filters = document.querySelectorAll(".nav-item");
-const modalEdit = document.querySelector("#editModal");
+const navsTabs = document.querySelectorAll(".nav-item");
 
 
 // Create the Empty Item List
@@ -182,6 +229,7 @@ let toDoItems = []
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    loadTabs(navsTabs, toDoItems, itemsList);
     loadItems(toDoItems, itemsList);
     addAnItem(form, itemInput, toDoItems, itemsList);
 
