@@ -21,20 +21,17 @@ const addAnItem = function (form, itemInput, itemsArray, elementsList) {
 }
 
 //Load local storage items to itemsArray
-const loadItems = function(itemsArray, elementsList, tabSelected){
-    let localItems = [];
-    if(tabSelected){
-        localItems = itemsArray;
-    }else {
-        localItems = getLocalStorage(itemsArray);
-    }
-    
+const loadItems = function(itemsArray, elementsList){
+    const localItems = getLocalStorage(itemsArray);
+    // console.log("Local Items",localItems);
+    const activeTab = getActiveTab();
+    const filteredItems = getTaskStatus(activeTab, localItems);
+    // console.log("Filtered Items",filteredItems);
     elementsList.innerHTML = "";
-    // if(localItems.length > 0){
-    if(localItems !== null || localItems !== undefined){
-        localItems.forEach(item => { 
+    // if(filteredItems.length > 0){
+    if(filteredItems !== null || filteredItems !== undefined){
+        filteredItems.forEach(item => { 
             renderItem(item, elementsList);
-            console.log(item);
             insertHandleToActionIcons(item, localItems, elementsList);
         });
     }else{
@@ -60,6 +57,12 @@ const getLocalStorage = function(itemsArray){
     const toDoStoraged = localStorage.getItem("todoItems");
     itemsArray = toDoStoraged ? JSON.parse(toDoStoraged) : [];
     return itemsArray;
+}
+
+const updateItemLocalStorage = function (itemIndex, itemsArray) {
+    const localItems = getLocalStorage(itemsArray);
+    localItems[itemIndex] = itemsArray[itemIndex];
+    setLocalStorage(localItems);
 }
 
 // Get the items array from local storage and set it into html elements
@@ -107,9 +110,11 @@ const insertHandleToActionIcons = function(item, localStorageArray, elementsList
                 // console.log(actionIcon.querySelector('.name'));
                 // console.log(actionIcon.querySelector('.data-done'));
                 if(actionIcon.title === "data-done"){
-                    // console.log("--------");
+                    console.log("--------");
+                    console.log(localStorageArray[spanElementIndex].name);
+                    console.log([spanElementIndex]);
                     changeStatus(localStorageArray[spanElementIndex]);
-                    setLocalStorage(localStorageArray);
+                    updateItemLocalStorage(spanElementIndex, localStorageArray);
                     // setLocalStorage(localStorageArray);
                 }else if(actionIcon.title === "data-delete"){
                     deleteItem(localStorageArray, spanElementIndex);
@@ -193,16 +198,13 @@ const loadTabs = function(tabsList, itemsArray, elementsList){
                 event.preventDefault();
                 hideAllTabs(tabsList);
                 showTab(tab);
-                const filteredTask = getTaskStatus(tab, itemsArray);
-                console.log(filteredTask);
-                loadItems(filteredTask, elementsList, true);
+                loadItems(itemsArray, elementsList);
             });
         });
     }
 }
 
 const getTaskStatus = function(tab, itemsArray){
-    itemsArray = getLocalStorage(itemsArray);
     const dataType = tab.getAttribute('data-type');
     if(dataType == "all"){
         return itemsArray;
@@ -211,6 +213,17 @@ const getTaskStatus = function(tab, itemsArray){
     // console.log();
     return itemsFiltered;
         // console.log(spanElement.getAttribute("data-time"))
+}
+
+const getActiveTab = function(){
+    const navigationTabs = document.querySelectorAll(".nav-item button");
+    let activeTab;
+    navigationTabs.forEach(button => {
+        if(button.getAttribute("class") === "nav-link active"){
+            activeTab = button.parentElement;
+        }
+    });
+    return activeTab;
 }
 
 // Creating Variables from DOM elements
