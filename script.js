@@ -36,7 +36,6 @@ const loadItems = function(itemsArray, elementsList){
             const taskElement = getActionIcons(item, localItems, elementsList);
             insertHandleToActionIcons(taskElement, localItems, elementsList);
         });
-        console.log("-----------///-----------");
     }else{
         setLocalStorage([]);
     }
@@ -70,6 +69,8 @@ const updateItemLocalStorage = function (itemIndex, itemsArray) {
 
 // Get the items array from local storage and set it into html elements
 const renderItem = function(item, elementsList){
+    let checkIcon = ""
+    item.status === "toDo" ? checkIcon = "bi-check2" : checkIcon = "bi-check-circle-fill";
     // elementsList.innerHTML = "";
     // if(localStorageArray.length > 0){
     //     localStorageArray.forEach(item => {   
@@ -77,7 +78,7 @@ const renderItem = function(item, elementsList){
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span>${item.name}</span>
                 <span data-time="${item.addedAt}">
-                    <button class="btn iconbtn" title="data-done"><i class="bi bi-check2 green"></i></button>
+                    <button class="btn iconbtn" title="data-done"><i class="bi ${checkIcon} green"></i></button>
                     <button type="button" class="btn iconbtn" title="data-edit" data-bs-toggle="modal" data-bs-target="#editModal"><i class="bi bi-pencil blue" ></i></button>
                     <button class="btn iconbtn" title="data-delete"><i class="bi bi-x-circle-fill red"></i></button>
             </li>`
@@ -124,8 +125,8 @@ const insertHandleToActionIcons = function(spanElement, localStorageArray, eleme
                 // console.log(actionIcon.querySelector('.name'));
                 // console.log(actionIcon.querySelector('.data-done'));
                 if(actionIcon.title === "data-done"){
-                    changeStatus(localStorageArray[itemIndex]);
-                    updateItemLocalStorage(itemIndex, localStorageArray);
+                    changeStatus(localStorageArray[itemIndex], actionIcon);
+                    updateItemLocalStorage(itemIndex, localStorageArray, elementsList);
                     loadItems(localStorageArray, elementsList);
                     // setLocalStorage(localStorageArray);
                 }else if(actionIcon.title === "data-delete"){
@@ -180,8 +181,19 @@ const findItemIndex = function(localStorageArray, item){
 }
 
 
-const changeStatus = function(item){
-    item.status === "toDo" ? item.status = "done" : item.status = "toDo";
+const changeStatus = function(item, actionIcon, elementsList){
+    let currentClass;
+    let newClass;
+    if(item.status === "toDo"){
+        currentClass = "bi-check2";
+        newClass = "bi-check-circle-fill";
+        item.status = "done";
+    }else{
+        currentClass = "bi-check-circle-fill";
+        newClass = "bi-check2";
+        item.status = "toDo";
+    }
+    actionIcon.firstElementChild.classList.replace(currentClass, newClass);
 }
 
 const updateName = (item, newName) => item.name = newName;
