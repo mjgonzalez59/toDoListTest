@@ -16,7 +16,8 @@ const addAnItem = function (form, itemInput, itemsArray, elementsList) {
         console.log(taskItem);
         addANewTask(taskItem, itemsArray, elementsList);
         renderItem(taskItem, elementsList);
-        insertHandleToActionIcons(taskItem, itemsArray, elementsList);        
+        const taskElement = getActionIcons(taskItem, itemsArray, elementsList);
+        insertHandleToActionIcons(taskElement, itemsArray, elementsList);
     });
 }
 
@@ -32,8 +33,10 @@ const loadItems = function(itemsArray, elementsList){
     if(filteredItems !== null || filteredItems !== undefined){
         filteredItems.forEach(item => { 
             renderItem(item, elementsList);
-            insertHandleToActionIcons(item, localItems, elementsList);
+            const taskElement = getActionIcons(item, localItems, elementsList);
+            insertHandleToActionIcons(taskElement, localItems, elementsList);
         });
+        console.log("-----------///-----------");
     }else{
         setLocalStorage([]);
     }
@@ -89,13 +92,24 @@ const renderItem = function(item, elementsList){
     
 }
 
-//Adding Event listener to ActionIcons
-const insertHandleToActionIcons = function(item, localStorageArray, elementsList){
-    const liList = document.querySelectorAll('.list-group-item');
+const getActionIcons = function(item, localStorageArray, elementsList){
     const dataTimeList = document.querySelectorAll('[data-time]');
     const dataTimeArray = Array.prototype.slice.call(dataTimeList);
     const spanElement = dataTimeArray.find(element => element.getAttribute('data-time') == item.addedAt);
-    const spanElementIndex = dataTimeArray.findIndex(element => element.getAttribute('data-time') == item.addedAt);
+    // const actionIcons = spanElement.querySelectorAll("button");
+    return spanElement;
+    // console.log("item", item);
+    // console.log("localStorageArray", localStorageArray);
+    // console.log("ElementsList", elementsList);
+}
+
+//Adding Event listener to ActionIcons
+const insertHandleToActionIcons = function(spanElement, localStorageArray, elementsList){
+    // const liList = document.querySelectorAll('.list-group-item');
+    // const dataTimeList = document.querySelectorAll('[data-time]');
+    // const dataTimeArray = Array.prototype.slice.call(dataTimeList);
+    // const spanElement = dataTimeArray.find(element => element.getAttribute('data-time') == item.addedAt);
+    const itemIndex = localStorageArray.findIndex(element => element.addedAt == spanElement.getAttribute('data-time'));
     const actionIcons = spanElement.querySelectorAll("button");
     // liList.forEach(item => {
         // const actionIcons = liTag.querySelectorAll("a");
@@ -110,21 +124,20 @@ const insertHandleToActionIcons = function(item, localStorageArray, elementsList
                 // console.log(actionIcon.querySelector('.name'));
                 // console.log(actionIcon.querySelector('.data-done'));
                 if(actionIcon.title === "data-done"){
-                    console.log("--------");
-                    console.log(localStorageArray[spanElementIndex].name);
-                    console.log([spanElementIndex]);
-                    changeStatus(localStorageArray[spanElementIndex]);
-                    updateItemLocalStorage(spanElementIndex, localStorageArray);
+                    changeStatus(localStorageArray[itemIndex]);
+                    updateItemLocalStorage(itemIndex, localStorageArray);
+                    loadItems(localStorageArray, elementsList);
                     // setLocalStorage(localStorageArray);
                 }else if(actionIcon.title === "data-delete"){
-                    deleteItem(localStorageArray, spanElementIndex);
+                    deleteItem(localStorageArray, itemIndex);
                     setLocalStorage(localStorageArray);
+                    // updateItemLocalStorage(itemIndex, localStorageArray);
                     loadItems(localStorageArray, elementsList);
                     // getList(localStorageArray, elementsList);
                 }else if(actionIcon.title === "data-edit"){
-                    editItemInput.value = item.name;
+                    editItemInput.value = localStorageArray[itemIndex].name;
                     const modalForm = document.querySelector("#modalForm");
-                    getArrayUpdated(modalForm, spanElementIndex, localStorageArray, elementsList);
+                    getArrayUpdated(modalForm, itemIndex, localStorageArray, elementsList);
                     // setLocalStorage(localStorageArray);
                     // loadItems(localStorageArray, elementsList);
                     // const modalComponent = document.querySelector("exampleModalCenter");
@@ -145,10 +158,10 @@ const insertHandleToActionIcons = function(item, localStorageArray, elementsList
 
 }
 
-const getArrayUpdated = function(form, spanElementIndex, localStorageArray, elementsList){
+const getArrayUpdated = function(form, itemIndex, localStorageArray, elementsList){
     form.addEventListener("submit", (event) => {
         event.preventDefault();
-        updateName(localStorageArray[spanElementIndex], editItemInput.value);
+        updateName(localStorageArray[itemIndex], editItemInput.value);
         setLocalStorage(localStorageArray);
         loadItems(localStorageArray, elementsList);
     });
