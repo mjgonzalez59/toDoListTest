@@ -18,16 +18,16 @@ const addAnItem = function (form, itemInput, itemsArray, elementsList) {
         renderItem(taskItem, elementsList);
         const taskElement = getActionIcons(taskItem, itemsArray, elementsList);
         insertHandleToActionIcons(taskElement, itemsArray, elementsList);
+        const activeTab = getActiveTab().getAttribute('data-type');
+        (activeTab === 'all' || activeTab === 'toDo') ? showItem(taskItem) : ''
     });
 }
 
 //Load local storage items to itemsArray
 const loadItems = function(itemsArray, elementsList){
     const localItems = getLocalStorage(itemsArray);
-    // console.log("Local Items",localItems);
     const activeTab = getActiveTab();
     const filteredItems = getTaskStatus(activeTab, localItems);
-    // console.log("Filtered Items",filteredItems);
     elementsList.innerHTML = "";
     // if(filteredItems.length > 0){
     if(filteredItems !== null || filteredItems !== undefined){
@@ -35,6 +35,7 @@ const loadItems = function(itemsArray, elementsList){
             renderItem(item, elementsList);
             const taskElement = getActionIcons(item, localItems, elementsList);
             insertHandleToActionIcons(taskElement, localItems, elementsList);
+            showItem(item);
         });
     }else{
         setLocalStorage([]);
@@ -75,7 +76,7 @@ const renderItem = function(item, elementsList){
     // if(localStorageArray.length > 0){
     //     localStorageArray.forEach(item => {   
             const liTag = `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
+            <li class="list-group-item d-flex justify-content-between align-items-center hide-li">
                 <span>${item.name}</span>
                 <span data-time="${item.addedAt}">
                     <button class="btn iconbtn" title="data-done"><i class="bi ${checkIcon} green"></i></button>
@@ -93,15 +94,26 @@ const renderItem = function(item, elementsList){
     
 }
 
-const getActionIcons = function(item, localStorageArray, elementsList){
+const showItem = function(item){
+    const liList = document.querySelectorAll('.list-group-item');
+    const liListArray = Array.prototype.slice.call(liList);
+    const liElement = liListArray.find(liElement => liElement.querySelector('[data-time]').getAttribute("data-time") == item.addedAt);
+    // liListArray.forEach(li => {
+    //     const dataTime = li.querySelector('[data-time]').getAttribute("data-time");
+    //     if(dataTime == item.addedAt){
+    //         console.log(li);
+    //     }
+    // });
+    // item.querySelector('[data-time]').getAttribute("data-time");
+    liElement.classList.remove("hide-li");
+}
+
+
+const getActionIcons = function(item){
     const dataTimeList = document.querySelectorAll('[data-time]');
     const dataTimeArray = Array.prototype.slice.call(dataTimeList);
     const spanElement = dataTimeArray.find(element => element.getAttribute('data-time') == item.addedAt);
-    // const actionIcons = spanElement.querySelectorAll("button");
     return spanElement;
-    // console.log("item", item);
-    // console.log("localStorageArray", localStorageArray);
-    // console.log("ElementsList", elementsList);
 }
 
 //Adding Event listener to ActionIcons
@@ -235,9 +247,7 @@ const getTaskStatus = function(tab, itemsArray){
         return itemsArray;
     }
     const itemsFiltered = itemsArray.filter(task => task.status == dataType);
-    // console.log();
     return itemsFiltered;
-        // console.log(spanElement.getAttribute("data-time"))
 }
 
 const getActiveTab = function(){
@@ -270,9 +280,6 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTabs(navsTabs, toDoItems, itemsList);
     loadItems(toDoItems, itemsList);
     addAnItem(form, itemInput, toDoItems, itemsList);
-
-
-    
     // const itemList = getLocalStorage(toDoItems);
     // console.log(itemList);
     // itemList.splice(0, 1); 
