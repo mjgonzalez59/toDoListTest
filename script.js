@@ -72,39 +72,21 @@ const updateItemLocalStorage = function (itemIndex, itemsArray) {
 const renderItem = function(item, elementsList){
     let checkIcon = ""
     item.status === "toDo" ? checkIcon = "bi-check2" : checkIcon = "bi-check-circle-fill";
-    // elementsList.innerHTML = "";
-    // if(localStorageArray.length > 0){
-    //     localStorageArray.forEach(item => {   
-            const liTag = `
-            <li class="list-group-item d-flex justify-content-between align-items-center hide-li">
-                <span>${item.name}</span>
-                <span data-time="${item.addedAt}">
-                    <button class="btn iconbtn" title="data-done"><i class="bi ${checkIcon} green"></i></button>
-                    <button type="button" class="btn iconbtn" title="data-edit" data-bs-toggle="modal" data-bs-target="#editModal"><i class="bi bi-pencil blue" ></i></button>
-                    <button class="btn iconbtn" title="data-delete"><i class="bi bi-x-circle-fill red"></i></button>
-            </li>`
-            elementsList.insertAdjacentHTML("beforeend", liTag);
-
-    //     });
-    // }else {
-    //     // data-done
-    //     // data-edit
-    //     // data-delete
-    // }
-    
+    const liTag = `
+    <li class="list-group-item d-flex justify-content-between align-items-center hide-li">
+        <span>${item.name}</span>
+        <span data-time="${item.addedAt}">
+            <button class="btn iconbtn" title="data-done"><i class="bi ${checkIcon} green"></i></button>
+            <button type="button" class="btn iconbtn" title="data-edit" data-bs-toggle="modal" data-bs-target="#editModal"><i class="bi bi-pencil blue" ></i></button>
+            <button class="btn iconbtn" title="data-delete"><i class="bi bi-x-circle-fill red"></i></button>
+    </li>`
+    elementsList.insertAdjacentHTML("beforeend", liTag);    
 }
 
 const showItem = function(item){
     const liList = document.querySelectorAll('.list-group-item');
     const liListArray = Array.prototype.slice.call(liList);
     const liElement = liListArray.find(liElement => liElement.querySelector('[data-time]').getAttribute("data-time") == item.addedAt);
-    // liListArray.forEach(li => {
-    //     const dataTime = li.querySelector('[data-time]').getAttribute("data-time");
-    //     if(dataTime == item.addedAt){
-    //         console.log(li);
-    //     }
-    // });
-    // item.querySelector('[data-time]').getAttribute("data-time");
     liElement.classList.remove("hide-li");
 }
 
